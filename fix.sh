@@ -128,8 +128,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 EOF
 
-# 9. OVERWRITING App.jsx with Robust API Fetching and Fixed Images
-echo "📺 Implementing full cinematic App.jsx with robust Instagram feed..."
+# 9. OVERWRITING App.jsx with User's Latest Layout Tweaks
+echo "📺 Implementing customized cinematic App.jsx..."
 cat << 'EOF' > src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { Camera, Film, Play, MoveRight, ExternalLink, Loader2 } from 'lucide-react';
@@ -205,7 +205,7 @@ const App = () => {
     <div className="min-h-screen bg-[#050505]">
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-700 px-6 md:px-12 py-8 flex justify-between items-center ${isScrolled ? 'bg-black/95 backdrop-blur-xl py-5 border-b border-white/5' : 'bg-transparent'}`}>
-        <div className="font-heading text-xl font-bold tracking-tighter text-white">SUSHRUTH JAY</div>
+        <div className="font-heading text-xl font-bold tracking-tighter text-white">AANAMI CHITRAM</div>
         
         <div className="flex gap-10 text-[10px] uppercase tracking-[0.4em] font-semibold text-zinc-500 hidden md:flex">
           <a href="#work" className="hover:text-accent transition-colors">Frames</a>
@@ -227,7 +227,7 @@ const App = () => {
         <div className="relative z-20">
           <span className="block font-heading text-accent text-[10px] tracking-[1em] mb-8 reveal">AANAMI CHITRAM PRESENTS</span>
           <h1 className="font-heading text-6xl md:text-[10rem] font-bold text-white mb-6 tracking-tighter reveal leading-none">
-            SUSHRUTH<br/><span className="text-stroke">JAY.</span>
+            SUSHRUTH<br/><span className="text-stroke">.</span>
           </h1>
           <div className="flex flex-col md:flex-row gap-4 md:gap-12 items-center justify-center mt-12 reveal">
             <div className="flex items-center gap-3 text-zinc-500 text-[10px] tracking-widest uppercase">
@@ -367,7 +367,7 @@ fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 # 12. Git Push & Final Deploy
 echo "📤 Pushing clean source to GitHub..."
 git add .
-git commit -m "Fix: Replaced broken placeholder image in Philosophy section"
+git commit -m "Update: Applied layout tweaks, secure email string, and dynamic header"
 git push origin main
 
 echo "🚀 Running Final Deployment..."
