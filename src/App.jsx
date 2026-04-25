@@ -92,9 +92,9 @@ const App = () => {
           <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=2000" className="w-full h-full object-cover" alt="Hero Background" />
         </div>
         <div className="relative z-20">
-          <span className="block font-heading text-accent text-[10px] tracking-[1em] mb-8 reveal">ఆనమి చిత్రం PRESENTS</span>
+          <span className="block font-heading text-accent text-[10px] tracking-[1em] mb-8 reveal">Independent films by</span>
           <h1 className="font-heading text-6xl md:text-[10rem] font-bold text-white mb-6 tracking-tighter reveal leading-none">
-            SUSHRUTH<br/><span className="text-stroke">.</span>
+            ఆనమి చిత్రం<br/><span className="text-stroke">.</span>
           </h1>
           <div className="flex flex-col md:flex-row gap-4 md:gap-12 items-center justify-center mt-12 reveal">
             <div className="flex items-center gap-3 text-zinc-500 text-[10px] tracking-widest uppercase">
@@ -197,7 +197,7 @@ const App = () => {
           </div>
 
           <div className="pt-20 border-t border-white/5 reveal">
-            <div className="font-heading text-zinc-900 text-[10vw] select-none leading-none opacity-20 mb-8">SUSHRUTH JAY</div>
+            <div className="font-heading text-zinc-900 text-[10vw] select-none leading-none opacity-20 mb-8">SUSHRUTH J.</div>
             <p className="text-zinc-700 text-[9px] uppercase tracking-[0.5em]">Independent Visuals • Hyderabad, Telangana • © 2024</p>
           </div>
         </div>
