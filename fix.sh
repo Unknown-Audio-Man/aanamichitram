@@ -128,7 +128,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 EOF
 
-# 9. OVERWRITING App.jsx with Robust API Fetching
+# 9. OVERWRITING App.jsx with Robust API Fetching and Fixed Images
 echo "📺 Implementing full cinematic App.jsx with robust Instagram feed..."
 cat << 'EOF' > src/App.jsx
 import React, { useState, useEffect } from 'react';
@@ -143,7 +143,7 @@ const App = () => {
   const BEHOLD_URL = "https://feeds.behold.so/NLdRMRMBGo8CZBJTagtW"; 
 
   // Obfuscated email to prevent simple bot scraping
-  const mUser = "hello";
+  const mUser = "j";
   const mDomain = "aanami.in";
 
   useEffect(() => {
@@ -192,6 +192,14 @@ const App = () => {
       observer.disconnect();
     };
   }, []);
+
+  // Use the latest Instagram photo for the Philosophy section, fallback to stock
+  let philosophyImage = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&q=80&w=1000";
+  if (instaPhotos.length > 0) {
+    const firstPhoto = instaPhotos[0];
+    const dynamicSrc = firstPhoto.thumbnailUrl || firstPhoto.thumbnail_url || firstPhoto.mediaUrl || firstPhoto.media_url || firstPhoto.url;
+    if (dynamicSrc) philosophyImage = dynamicSrc;
+  }
 
   return (
     <div className="min-h-screen bg-[#050505]">
@@ -252,7 +260,7 @@ const App = () => {
             </div>
             <div className="md:col-span-5 reveal">
               <div className="aspect-[3/4] overflow-hidden border border-white/5 bg-zinc-900">
-                <img src="https://images.unsplash.com/photo-1542204172-3c1f11c56f7f?q=80&w=1000" className="w-full h-full object-cover opacity-70 grayscale hover:grayscale-0 transition-all duration-1000" alt="Philosophy" />
+                <img src={philosophyImage} className="w-full h-full object-cover opacity-70 grayscale hover:grayscale-0 transition-all duration-1000" alt="Philosophy / Cinematic Eye" />
               </div>
             </div>
           </div>
@@ -359,7 +367,7 @@ fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 # 12. Git Push & Final Deploy
 echo "📤 Pushing clean source to GitHub..."
 git add .
-git commit -m "Fix: Removed invisible reveal class from dynamic Instagram elements"
+git commit -m "Fix: Replaced broken placeholder image in Philosophy section"
 git push origin main
 
 echo "🚀 Running Final Deployment..."

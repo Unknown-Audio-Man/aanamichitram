@@ -10,7 +10,7 @@ const App = () => {
   const BEHOLD_URL = "https://feeds.behold.so/NLdRMRMBGo8CZBJTagtW"; 
 
   // Obfuscated email to prevent simple bot scraping
-  const mUser = "hello";
+  const mUser = "j";
   const mDomain = "aanami.in";
 
   useEffect(() => {
@@ -60,11 +60,19 @@ const App = () => {
     };
   }, []);
 
+  // Use the latest Instagram photo for the Philosophy section, fallback to stock
+  let philosophyImage = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&q=80&w=1000";
+  if (instaPhotos.length > 0) {
+    const firstPhoto = instaPhotos[0];
+    const dynamicSrc = firstPhoto.thumbnailUrl || firstPhoto.thumbnail_url || firstPhoto.mediaUrl || firstPhoto.media_url || firstPhoto.url;
+    if (dynamicSrc) philosophyImage = dynamicSrc;
+  }
+
   return (
     <div className="min-h-screen bg-[#050505]">
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-700 px-6 md:px-12 py-8 flex justify-between items-center ${isScrolled ? 'bg-black/95 backdrop-blur-xl py-5 border-b border-white/5' : 'bg-transparent'}`}>
-        <div className="font-heading text-xl font-bold tracking-tighter text-white">Aanami Chitram | Sushruth</div>
+        <div className="font-heading text-xl font-bold tracking-tighter text-white">SUSHRUTH JAY</div>
         
         <div className="flex gap-10 text-[10px] uppercase tracking-[0.4em] font-semibold text-zinc-500 hidden md:flex">
           <a href="#work" className="hover:text-accent transition-colors">Frames</a>
@@ -86,7 +94,7 @@ const App = () => {
         <div className="relative z-20">
           <span className="block font-heading text-accent text-[10px] tracking-[1em] mb-8 reveal">AANAMI CHITRAM PRESENTS</span>
           <h1 className="font-heading text-6xl md:text-[10rem] font-bold text-white mb-6 tracking-tighter reveal leading-none">
-            SUSHRUTH<br/><span className="text-stroke">.</span>
+            SUSHRUTH<br/><span className="text-stroke">JAY.</span>
           </h1>
           <div className="flex flex-col md:flex-row gap-4 md:gap-12 items-center justify-center mt-12 reveal">
             <div className="flex items-center gap-3 text-zinc-500 text-[10px] tracking-widest uppercase">
@@ -119,7 +127,7 @@ const App = () => {
             </div>
             <div className="md:col-span-5 reveal">
               <div className="aspect-[3/4] overflow-hidden border border-white/5 bg-zinc-900">
-                <img src="https://images.unsplash.com/photo-1542204172-3c1f11c56f7f?q=80&w=1000" className="w-full h-full object-cover opacity-70 grayscale hover:grayscale-0 transition-all duration-1000" alt="Philosophy" />
+                <img src={philosophyImage} className="w-full h-full object-cover opacity-70 grayscale hover:grayscale-0 transition-all duration-1000" alt="Philosophy / Cinematic Eye" />
               </div>
             </div>
           </div>
