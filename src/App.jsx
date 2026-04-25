@@ -9,6 +9,10 @@ const App = () => {
   // Directly connecting your Behold.so JSON feed
   const BEHOLD_URL = "https://feeds.behold.so/NLdRMRMBGo8CZBJTagtW"; 
 
+  // Obfuscated email to prevent simple bot scraping
+  const mUser = "hello";
+  const mDomain = "aanami.in";
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
@@ -166,9 +170,10 @@ const App = () => {
           <h2 className="font-heading text-4xl md:text-6xl text-white mb-16 reveal tracking-tighter">LET'S BUILD A<br/>NEW PERSPECTIVE.</h2>
           
           <div className="flex flex-col md:flex-row justify-center gap-12 mb-24 reveal">
-            <a href="mailto:hello@aanami.in" className="group">
+            {/* Obfuscated email link */}
+            <a href={`mailto:${mUser}@${mDomain}`} className="group">
                 <p className="text-zinc-500 text-[10px] tracking-widest uppercase mb-2">Email</p>
-                <p className="text-xl text-white group-hover:text-accent transition-colors font-light">hello@aanami.in</p>
+                <p className="text-xl text-white group-hover:text-accent transition-colors font-light">{mUser}@{mDomain}</p>
             </a>
             <a href="https://instagram.com/sushruthjay" target="_blank" rel="noreferrer" className="group">
                 <p className="text-zinc-500 text-[10px] tracking-widest uppercase mb-2">Social</p>
