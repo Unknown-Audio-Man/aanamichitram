@@ -276,13 +276,20 @@ const App = () => {
               {instaPhotos.map((photo, i) => {
                 // Safeguard against missing data structures
                 const link = photo.permalink || photo.link || `https://instagram.com/sushruthjay`;
-                const imgSource = photo.mediaUrl || photo.url || photo.thumbnailUrl || null;
+                // Crucial fix: Prioritize thumbnails so video posts render successfully
+                const imgSource = photo.thumbnailUrl || photo.thumbnail_url || photo.mediaUrl || photo.media_url || photo.url || null;
 
                 if (!imgSource) return null;
+                const isVideo = imgSource.includes('.mp4');
 
                 return (
-                  <a key={photo.id || i} href={link} target="_blank" rel="noreferrer" className="group reveal overflow-hidden block aspect-square bg-zinc-900">
-                    <img src={imgSource} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Instagram Post" />
+                  // Removed 'reveal' class so they don't get stuck invisible!
+                  <a key={photo.id || i} href={link} target="_blank" rel="noreferrer" className="group overflow-hidden block aspect-square bg-zinc-900">
+                    {isVideo ? (
+                      <video src={imgSource} autoPlay loop muted playsInline className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                    ) : (
+                      <img src={imgSource} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Instagram Post" />
+                    )}
                   </a>
                 )
               })}
@@ -352,7 +359,7 @@ fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 # 12. Git Push & Final Deploy
 echo "📤 Pushing clean source to GitHub..."
 git add .
-git commit -m "Fix: Hardened Instagram API fetching logic and obfuscated contact email"
+git commit -m "Fix: Removed invisible reveal class from dynamic Instagram elements"
 git push origin main
 
 echo "🚀 Running Final Deployment..."
