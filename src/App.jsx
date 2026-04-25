@@ -10,7 +10,7 @@ const App = () => {
   // 1. Go to https://behold.so (Free for 1 feed)
   // 2. Connect your Instagram @sushruthjay
   // 3. Copy the "JSON Feed URL" and paste it below
-  const BEHOLD_URL = ""; 
+  const BEHOLD_URL = "https://feeds.behold.so/NLdRMRMBGo8CZBJTagtW"; 
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
