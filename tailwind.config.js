@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  // This tells Tailwind to scan App.jsx for classes to compile
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
