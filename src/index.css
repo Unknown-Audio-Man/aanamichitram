@@ -27,16 +27,3 @@
   -webkit-text-stroke: 1px rgba(255,255,255,0.1);
   color: transparent;
 }
-
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: #0a0a0a;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #d4af37;
-}

@@ -1,39 +1,37 @@
 #!/bin/bash
 
-echo "Starting portfolio fixes..."
+echo "🚀 Starting a Deep Clean & Rebuild of aanami.in..."
 
-# Ensure we are in the correct directory by checking for package.json
+# 1. Environment Check
 if [ ! -f "package.json" ]; then
-    echo "Error: package.json not found."
-    echo "Please ensure you run this script inside your project folder: ~/aanamichitram/aanamichitram"
+    echo "❌ Error: package.json not found. Run this in ~/aanamichitram/aanamichitram"
     exit 1
 fi
 
-echo "1. Updating vite.config.js..."
-cat << 'EOF' > vite.config.js
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+# 2. The "From Scratch" Part: Deep Cleaning
+echo "🧹 Wiping old dependencies and cache..."
+rm -rf node_modules package-lock.json dist
+# Clear npm cache to prevent corrupted styling builds
+npm cache clean --force
 
-export default defineConfig({
-  plugins: [react()],
-  base: '/', 
-  build: {
-    target: 'esnext',
-    minify: 'esbuild',
-    sourcemap: false, 
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          icons: ['lucide-react']
-        }
-      }
-    }
-  }
-});
+# 3. Reinstalling Core Engines
+echo "📦 Reinstalling styling and deployment engines..."
+npm install
+npm install -D tailwindcss postcss autoprefixer gh-pages
+
+# 4. Critical File Regeneration: PostCSS (Vite's Styling Bridge)
+echo "🛠️ Regenerating postcss.config.js..."
+cat << 'EOF' > postcss.config.js
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
 EOF
 
-echo "2. Updating tailwind.config.js..."
+# 5. Critical File Regeneration: Tailwind Config
+echo "🎨 Regenerating tailwind.config.js..."
 cat << 'EOF' > tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -57,17 +55,33 @@ export default {
 }
 EOF
 
-echo "3. Creating postcss.config.js (CRITICAL for Vite to process Tailwind)..."
-cat << 'EOF' > postcss.config.js
-export default {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-}
+# 6. Critical File Regeneration: Vite Config (Domain Root)
+echo "🏗️ Regenerating vite.config.js..."
+cat << 'EOF' > vite.config.js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  base: '/', 
+  build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          icons: ['lucide-react']
+        }
+      }
+    }
+  }
+});
 EOF
 
-echo "4. Re-writing src/index.css with Tailwind directives..."
+# 7. Resetting CSS Directives
+echo "📝 Resetting src/index.css..."
 cat << 'EOF' > src/index.css
 @tailwind base;
 @tailwind components;
@@ -98,27 +112,15 @@ cat << 'EOF' > src/index.css
   -webkit-text-stroke: 1px rgba(255,255,255,0.1);
   color: transparent;
 }
-
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: #0a0a0a;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #d4af37;
-}
 EOF
 
-echo "5. Updating src/main.jsx (Fixing the CSS import)..."
+# 8. Resetting Main Entry (The Connection)
+echo "🔗 Resetting src/main.jsx..."
 cat << 'EOF' > src/main.jsx
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
-import './index.css' // CRITICAL: This makes Tailwind work!
+import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -127,15 +129,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 EOF
 
-echo "6. Removing GitHub Actions and installing required dependencies..."
-rm -rf .github
-npm install -D tailwindcss postcss autoprefixer gh-pages
-
-echo "7. Ensuring CNAME is set for aanami.in..."
+# 9. Ensuring Domain Identity
+echo "🌐 Setting CNAME..."
 mkdir -p public
 echo "aanami.in" > public/CNAME
 
-echo "8. Restoring deploy scripts to package.json..."
+# 10. Syncing Package Scripts
+echo "📑 Syncing package.json scripts..."
 node -e "
 const fs = require('fs');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
@@ -151,15 +151,19 @@ pkg.scripts = {
 fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 "
 
-echo "9. Committing and Pushing to GitHub..."
+# 11. Git Push & Final Deploy
+echo "📤 Pushing clean source to GitHub..."
 git add .
-git commit -m "Fix: Added missing PostCSS config and rebuilt CSS"
+git commit -m "Deep Clean: Rebuilt styling and config from scratch"
 git push origin main
 
-echo "10. Deploying directly to gh-pages branch..."
+echo "🚀 Running Final Deployment..."
 npm run deploy
 
 echo ""
 echo "==========================================================="
-echo "✅ SUCCESS! Your site is built and pushed to GitHub."
+echo "✅ DEEP REBUILD COMPLETE!"
 echo "==========================================================="
+echo "1. Refresh aanami.in in 60 seconds."
+echo "2. If styling still doesn't show, try an Incognito window."
+echo "3. Double check GitHub Settings > Pages is set to 'gh-pages' branch."
