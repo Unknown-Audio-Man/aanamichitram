@@ -1,207 +1,297 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Film, Play, MoveRight, ExternalLink, Loader2 } from 'lucide-react';
+import { 
+  Camera, Film, Instagram, Mail, Play, MoveRight, 
+  Lock, LayoutDashboard, Clock, Plus, LogOut, Trash2, 
+  User, CheckCircle, ChevronRight, Eye
+} from 'lucide-react';
+
+// Firebase imports
+import { initializeApp } from 'firebase/app';
+import { 
+  getFirestore, collection, addDoc, onSnapshot, 
+  query, doc, deleteDoc, updateDoc, where 
+} from 'firebase/firestore';
+import { 
+  getAuth, signInAnonymously, onAuthStateChanged, signOut, signInWithCustomToken 
+} from 'firebase/auth';
+
+// --- FIREBASE INITIALIZATION ---
+const firebaseConfig = JSON.parse(window.__firebase_config || '{"apiKey": "", "authDomain": "", "projectId": "", "storageBucket": "", "messagingSenderId": "", "appId": ""}');
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'aanami-pro';
 
 const App = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [instaPhotos, setInstaPhotos] = useState([]);
+  const [view, setView] = useState('portfolio'); // portfolio, login, admin, client
+  const [user, setUser] = useState(null);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Directly connecting your Behold.so JSON feed
-  const BEHOLD_URL = "https://feeds.behold.so/NLdRMRMBGo8CZBJTagtW"; 
+  // Form States
+  const [newProject, setNewProject] = useState({ title: '', clientEmail: '', status: 'Planning', note: '' });
+  const [loginEmail, setLoginEmail] = useState('');
 
-  // Obfuscated email to prevent simple bot scraping
-  const mUser = "j";
-  const mDomain = "aanami.in";
-
+  // 1. Authentication Setup (Rule 3: Auth Before Queries)
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('active');
-      });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-    // Robust fetch for Behold JSON
-    if (BEHOLD_URL) {
-      fetch(BEHOLD_URL)
-        .then(res => {
-          if (!res.ok) throw new Error("Network response not ok");
-          return res.json();
-        })
-        .then(data => {
-          // Behold sometimes returns arrays directly, or wraps them
-          let posts = [];
-          if (Array.isArray(data)) {
-            posts = data;
-          } else if (data && Array.isArray(data.posts)) {
-            posts = data.posts;
-          } else if (data && Array.isArray(data.data)) {
-            posts = data.data;
-          }
-          
-          setInstaPhotos(posts.slice(0, 6)); // Get latest 6 photos
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error("Instagram Feed Error:", err);
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      observer.disconnect();
+    const initAuth = async () => {
+      try {
+        if (typeof window.__initial_auth_token !== 'undefined' && window.__initial_auth_token) {
+          await signInWithCustomToken(auth, window.__initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error("Auth Error:", err);
+      }
     };
+    initAuth();
+
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
-  // Use the latest Instagram photo for the Philosophy section, fallback to stock
-  let philosophyImage = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&q=80&w=1000";
-  if (instaPhotos.length > 0) {
-    const firstPhoto = instaPhotos[0];
-    const dynamicSrc = firstPhoto.thumbnailUrl || firstPhoto.thumbnail_url || firstPhoto.mediaUrl || firstPhoto.media_url || firstPhoto.url;
-    if (dynamicSrc) philosophyImage = dynamicSrc;
-  }
+  // 2. Data Listener (Rule 1 & 2: Simple Queries + Strict Paths)
+  useEffect(() => {
+    if (!user) return;
 
-  return (
-    <div className="min-h-screen bg-[#050505]">
-      {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-700 px-6 md:px-12 py-8 flex justify-between items-center ${isScrolled ? 'bg-black/95 backdrop-blur-xl py-5 border-b border-white/5' : 'bg-transparent'}`}>
-        <div className="font-heading text-xl font-bold tracking-tighter text-white">ఆనమి చిత్రం</div>
-        
-        <div className="flex gap-10 text-[10px] uppercase tracking-[0.4em] font-semibold text-zinc-500 hidden md:flex">
-          <a href="#work" className="hover:text-accent transition-colors">Frames</a>
-          <a href="#vision" className="hover:text-accent transition-colors">Philosophy</a>
-          <a href="#contact" className="hover:text-accent transition-colors">Contact</a>
-        </div>
+    // Fetch all projects (Rule 2: Filter in JS memory for simplicity/no-index)
+    const q = collection(db, 'artifacts', appId, 'public', 'data', 'projects');
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setProjects(data);
+    }, (err) => {
+      setError("Database access restricted. Check Firebase rules.");
+    });
 
-        <a href="https://www.instagram.com/sushruthjay" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-accent text-[10px] tracking-widest font-bold uppercase border-b border-accent/20 pb-1 hover:border-accent transition-all">
-          Instagram <ExternalLink size={12} />
-        </a>
+    return () => unsubscribe();
+  }, [user]);
+
+  // --- ACTIONS ---
+  const handleCreateProject = async (e) => {
+    e.preventDefault();
+    if (!newProject.title) return;
+    try {
+      await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'projects'), {
+        ...newProject,
+        createdAt: new Date().toISOString(),
+        createdBy: user.uid,
+      });
+      setNewProject({ title: '', clientEmail: '', status: 'Planning', note: '' });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const updateStatus = async (id, status) => {
+    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'projects', id), { status });
+  };
+
+  const deleteProject = async (id) => {
+    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'projects', id));
+  };
+
+  // --- VIEWS ---
+
+  // 1. PUBLIC PORTFOLIO
+  const PortfolioView = () => (
+    <div className="min-h-screen bg-[#050505] text-zinc-300">
+      <nav className="fixed top-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black to-transparent">
+        <div className="font-heading text-lg font-bold tracking-tighter text-white">SUSHRUTH JAY</div>
+        <button 
+          onClick={() => setView('login')}
+          className="text-[10px] tracking-[0.3em] font-bold uppercase border border-white/10 px-4 py-2 hover:bg-white hover:text-black transition-all"
+        >
+          Client Access
+        </button>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative h-screen flex flex-col justify-center items-center text-center px-4 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/80 to-[#050505] z-10"></div>
-          <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=2000" className="w-full h-full object-cover" alt="Hero Background" />
-        </div>
-        <div className="relative z-20">
-          <span className="block font-heading text-accent text-[10px] tracking-[1em] mb-8 reveal">Independent films by</span>
-          <h1 className="font-heading text-6xl md:text-[10rem] font-bold text-white mb-6 tracking-tighter reveal leading-none">
-            ఆనమి చిత్రం<br/><span className="text-stroke">.</span>
-          </h1>
-          <div className="flex flex-col md:flex-row gap-4 md:gap-12 items-center justify-center mt-12 reveal">
-            <div className="flex items-center gap-3 text-zinc-500 text-[10px] tracking-widest uppercase">
-              <Film size={14} className="text-accent" /> Independent Filmmaker
-            </div>
-            <div className="w-1 h-1 bg-zinc-800 rounded-full hidden md:block"></div>
-            <div className="flex items-center gap-3 text-zinc-500 text-[10px] tracking-widest uppercase">
-              <Camera size={14} className="text-accent" /> Storyteller & Photographer
-            </div>
-          </div>
+      <section className="h-screen flex flex-col justify-center items-center text-center px-4">
+        <div className="w-px h-20 bg-accent mb-12 animate-pulse"></div>
+        <h1 className="font-heading text-6xl md:text-9xl font-bold text-white mb-6 tracking-tighter">
+          AANAMI<span className="text-accent">.</span>
+        </h1>
+        <p className="text-zinc-500 max-w-lg mx-auto text-xs md:text-sm tracking-[0.2em] uppercase mb-12 leading-loose">
+          Independent Filmmaking & <br/>Photography from Hyderabad
+        </p>
+        <div className="flex gap-8">
+            <a href="https://instagram.com/sushruthjay" className="text-zinc-500 hover:text-accent transition-colors"><Instagram size={20} /></a>
+            <a href="mailto:hello@aanami.in" className="text-zinc-500 hover:text-accent transition-colors"><Mail size={20} /></a>
         </div>
       </section>
+    </div>
+  );
 
-      {/* Philosophy Section */}
-      <section id="vision" className="py-40 px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid md:grid-cols-12 gap-12 items-start">
-            <div className="md:col-span-7 reveal">
-              <h2 className="font-heading text-zinc-800 text-8xl absolute -top-10 -left-10 select-none pointer-events-none opacity-20 uppercase">Aanami</h2>
-              <h3 className="font-heading text-3xl text-white mb-10 leading-tight">CHASING THE <span className="text-accent italic">NAMELESS</span> EMOTIONS.</h3>
-              <p className="text-zinc-400 text-lg leading-relaxed mb-8 font-light italic">
-                "In an industry that celebrates the loud, I find my stories in the whispers of the Telugu streets."
-              </p>
-              <p className="text-zinc-500 text-sm leading-loose max-w-lg mb-12">
-                My work as a filmmaker is an extension of my photography. I believe every story already exists in the environment; as a director, my job is simply to find the right frame to let it speak. I focus on atmosphere, texture, and the raw human condition.
-              </p>
-              <button className="group flex items-center gap-6 text-white text-[10px] tracking-[0.5em] uppercase font-bold">
-                The Filmmaker's Eye <MoveRight className="group-hover:translate-x-3 transition-transform text-accent" />
-              </button>
-            </div>
-            <div className="md:col-span-5 reveal">
-              <div className="aspect-[3/4] overflow-hidden border border-white/5 bg-zinc-900">
-                <img src={philosophyImage} className="w-full h-full object-cover opacity-70 grayscale hover:grayscale-0 transition-all duration-1000" alt="Philosophy / Cinematic Eye" />
+  // 2. LOGIN GATE
+  const LoginView = () => (
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6">
+      <div className="max-w-md w-full bg-zinc-900/40 border border-white/5 p-10 backdrop-blur-sm">
+        <Lock className="text-accent mb-6 mx-auto" size={32} />
+        <h2 className="font-heading text-xl text-white text-center mb-2 uppercase tracking-widest">Workspace</h2>
+        <p className="text-zinc-500 text-[10px] text-center mb-8 uppercase tracking-[0.3em]">Enter access credentials</p>
+        
+        <div className="space-y-4">
+          <input 
+            type="email" 
+            placeholder="ACCESS EMAIL"
+            value={loginEmail}
+            onChange={(e) => setLoginEmail(e.target.value)}
+            className="w-full bg-black border border-white/10 p-4 text-[10px] tracking-widest text-white outline-none focus:border-accent transition-all"
+          />
+          <button 
+            onClick={() => {
+              // Simplified logic: If email is yours, go to Admin. Otherwise, Client.
+              if (loginEmail === 'jay@aanami.in') setView('admin');
+              else if (loginEmail.includes('@')) setView('client');
+            }}
+            className="w-full py-4 bg-white text-black text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-accent transition-all"
+          >
+            Authenticate
+          </button>
+          <button onClick={() => setView('portfolio')} className="w-full text-[9px] text-zinc-600 uppercase tracking-widest pt-4">Return Home</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // 3. ADMIN DASHBOARD (FOR JAY)
+  const AdminView = () => (
+    <div className="min-h-screen bg-[#050505] p-8 md:p-16">
+      <header className="flex justify-between items-center mb-16">
+        <div>
+          <h2 className="font-heading text-2xl text-white tracking-tighter">DIRECTOR'S HUB</h2>
+          <p className="text-accent text-[10px] uppercase tracking-widest">Sushruth Jay • Admin</p>
+        </div>
+        <button onClick={() => setView('portfolio')} className="p-2 border border-white/10 text-zinc-500 hover:text-white"><LogOut size={18}/></button>
+      </header>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* Form */}
+        <div className="lg:col-span-4 bg-zinc-900/30 p-8 border border-white/5">
+          <h3 className="font-heading text-xs text-white mb-8 uppercase tracking-widest border-b border-white/5 pb-4">Initialize Project</h3>
+          <form onSubmit={handleCreateProject} className="space-y-6">
+            <input 
+              placeholder="PROJECT TITLE"
+              className="w-full bg-transparent border-b border-white/10 py-2 text-[10px] tracking-widest outline-none focus:border-accent"
+              value={newProject.title}
+              onChange={e => setNewProject({...newProject, title: e.target.value})}
+            />
+            <input 
+              placeholder="CLIENT EMAIL"
+              className="w-full bg-transparent border-b border-white/10 py-2 text-[10px] tracking-widest outline-none focus:border-accent"
+              value={newProject.clientEmail}
+              onChange={e => setNewProject({...newProject, clientEmail: e.target.value})}
+            />
+            <select 
+                className="w-full bg-black border border-white/10 py-2 text-[10px] tracking-widest text-zinc-400 outline-none"
+                value={newProject.status}
+                onChange={e => setNewProject({...newProject, status: e.target.value})}
+            >
+                <option>Planning</option>
+                <option>Filming</option>
+                <option>Editing</option>
+                <option>Review</option>
+                <option>Delivered</option>
+            </select>
+            <button className="w-full bg-accent text-black font-bold py-3 text-[10px] uppercase tracking-widest hover:bg-white transition-all">Add to Pipeline</button>
+          </form>
+        </div>
+
+        {/* List */}
+        <div className="lg:col-span-8 space-y-4">
+          <h3 className="font-heading text-xs text-zinc-600 mb-8 uppercase tracking-widest">Active Pipeline</h3>
+          {projects.map(proj => (
+            <div key={proj.id} className="bg-zinc-900/20 border border-white/5 p-6 flex flex-col md:flex-row justify-between items-center gap-4 group hover:border-white/20 transition-all">
+              <div className="text-center md:text-left">
+                <h4 className="text-white text-sm font-medium tracking-wide mb-1">{proj.title}</h4>
+                <p className="text-zinc-600 text-[9px] uppercase tracking-widest">{proj.clientEmail}</p>
+              </div>
+              <div className="flex items-center gap-6">
+                <span className={`text-[9px] px-3 py-1 uppercase tracking-tighter font-bold rounded-full ${proj.status === 'Delivered' ? 'bg-green-900/20 text-green-500' : 'bg-accent/10 text-accent'}`}>
+                    {proj.status}
+                </span>
+                <button onClick={() => deleteProject(proj.id)} className="text-zinc-700 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>
               </div>
             </div>
-          </div>
+          ))}
         </div>
-      </section>
+      </div>
+    </div>
+  );
 
-      {/* Live Frames (Instagram) Section */}
-      <section id="work" className="py-40 px-6 md:px-12 bg-[#030303]">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-6 reveal">
-            <div>
-              <h2 className="font-heading text-4xl text-white mb-4 uppercase text-left">Live Frames</h2>
-              <p className="text-zinc-500 text-[10px] tracking-[0.4em] uppercase text-left">Latest from @sushruthjay</p>
-            </div>
-          </div>
+  // 4. CLIENT VIEW (FOR YOUR CLIENTS)
+  const ClientView = () => {
+    const myProjects = projects.filter(p => p.clientEmail === loginEmail);
+    return (
+      <div className="min-h-screen bg-[#050505] p-8 md:p-16">
+        <header className="mb-20 text-center">
+            <h2 className="font-heading text-xl text-white mb-2 uppercase tracking-[0.4em]">Client Portal</h2>
+            <p className="text-zinc-600 text-[9px] tracking-widest uppercase">Logged in as {loginEmail}</p>
+        </header>
 
-          {loading ? (
-            <div className="flex justify-center py-20"><Loader2 className="animate-spin text-accent" /></div>
-          ) : instaPhotos.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {instaPhotos.map((photo, i) => {
-                // Safeguard against missing data structures
-                const link = photo.permalink || photo.link || `https://instagram.com/sushruthjay`;
-                // Crucial fix: Prioritize thumbnails so video posts render successfully
-                const imgSource = photo.thumbnailUrl || photo.thumbnail_url || photo.mediaUrl || photo.media_url || photo.url || null;
+        <div className="max-w-3xl mx-auto space-y-12">
+            {myProjects.length === 0 ? (
+                <div className="text-center py-20 border border-dashed border-white/10 text-zinc-700 text-sm italic">
+                    No active projects found for this email address.
+                </div>
+            ) : myProjects.map(proj => (
+                <div key={proj.id} className="relative p-10 border border-white/5 bg-zinc-900/10">
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+                        <div className="flex-1">
+                            <span className="text-accent text-[9px] font-bold uppercase tracking-[0.4em] mb-4 block">Active Project</span>
+                            <h3 className="font-heading text-2xl text-white mb-6 uppercase">{proj.title}</h3>
+                            
+                            {/* Visual Progress Tracker */}
+                            <div className="flex justify-between mb-8 relative">
+                                <div className="absolute top-1/2 w-full h-[1px] bg-white/5 -z-10"></div>
+                                {['Planning', 'Filming', 'Editing', 'Delivered'].map((step, idx) => (
+                                    <div key={step} className="flex flex-col items-center gap-2">
+                                        <div className={`w-3 h-3 rounded-full border ${proj.status === step ? 'bg-accent border-accent scale-125' : 'bg-black border-white/20'}`}></div>
+                                        <span className={`text-[8px] uppercase tracking-tighter ${proj.status === step ? 'text-white font-bold' : 'text-zinc-700'}`}>{step}</span>
+                                    </div>
+                                ))}
+                            </div>
 
-                if (!imgSource) return null;
-                const isVideo = imgSource.includes('.mp4');
-
-                return (
-                  // Removed 'reveal' class so they don't get stuck invisible!
-                  <a key={photo.id || i} href={link} target="_blank" rel="noreferrer" className="group overflow-hidden block aspect-square bg-zinc-900">
-                    {isVideo ? (
-                      <video src={imgSource} autoPlay loop muted playsInline className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
-                    ) : (
-                      <img src={imgSource} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Instagram Post" />
-                    )}
-                  </a>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-20 border border-white/5 rounded-lg">
-                <p className="text-zinc-500 italic text-sm mb-4">No recent photos found on the feed.</p>
-                <a href="https://instagram.com/sushruthjay" target="_blank" rel="noreferrer" className="text-accent text-[10px] tracking-widest uppercase font-bold">View Profile Manually</a>
-            </div>
-          )}
+                            <p className="text-zinc-500 text-xs leading-relaxed italic mb-8">
+                                Status Update: We are currently in the <span className="text-white">{proj.status}</span> phase. Your assets will appear here once ready for review.
+                            </p>
+                            
+                            <button className="flex items-center gap-3 text-white text-[10px] tracking-widest uppercase border border-white/10 px-6 py-3 hover:bg-white hover:text-black transition-all">
+                                <Eye size={14} /> Review Latest Frames
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ))}
         </div>
-      </section>
-
-      {/* Contact Section */}
-      <footer id="contact" className="py-40 px-8 border-t border-white/5 bg-black">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="text-accent text-[10px] tracking-[0.6em] uppercase mb-12 block reveal">AVAILABLE FOR COLLABORATION</span>
-          <h2 className="font-heading text-4xl md:text-6xl text-white mb-16 reveal tracking-tighter">LET'S BUILD A<br/>NEW PERSPECTIVE.</h2>
-          
-          <div className="flex flex-col md:flex-row justify-center gap-12 mb-24 reveal">
-            {/* Obfuscated email link */}
-            <a href={`mailto:${mUser}@${mDomain}`} className="group">
-                <p className="text-zinc-500 text-[10px] tracking-widest uppercase mb-2">Email</p>
-                <p className="text-xl text-white group-hover:text-accent transition-colors font-light">{mUser}@{mDomain}</p>
-            </a>
-            <a href="https://instagram.com/sushruthjay" target="_blank" rel="noreferrer" className="group">
-                <p className="text-zinc-500 text-[10px] tracking-widest uppercase mb-2">Social</p>
-                <p className="text-xl text-white group-hover:text-accent transition-colors font-light">@sushruthjay</p>
-            </a>
-          </div>
-
-          <div className="pt-20 border-t border-white/5 reveal">
-            <div className="font-heading text-zinc-900 text-[10vw] select-none leading-none opacity-20 mb-8">SUSHRUTH J.</div>
-            <p className="text-zinc-700 text-[9px] uppercase tracking-[0.5em]">Independent Visuals • Hyderabad, Telangana • © 2024</p>
-          </div>
+        
+        <div className="mt-20 text-center">
+            <button onClick={() => setView('portfolio')} className="text-zinc-700 hover:text-white text-[9px] uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mx-auto">
+               <LogOut size={12} /> Sign Out
+            </button>
         </div>
-      </footer>
+      </div>
+    );
+  }
+
+  // --- RENDER LOGIC ---
+  if (loading) return (
+    <div className="h-screen bg-black flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+        <div className="font-heading text-[10px] text-white tracking-[0.5em] animate-pulse uppercase">AANAMI WORKSPACE</div>
+    </div>
+  );
+
+  return (
+    <div className="font-sans selection:bg-accent/30">
+        {view === 'portfolio' && <PortfolioView />}
+        {view === 'login' && <LoginView />}
+        {view === 'admin' && <AdminView />}
+        {view === 'client' && <ClientView />}
     </div>
   );
 };
