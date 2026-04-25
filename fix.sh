@@ -57,7 +57,63 @@ export default {
 }
 EOF
 
-echo "3. Updating src/main.jsx (Fixing the CSS import)..."
+echo "3. Creating postcss.config.js (CRITICAL for Vite to process Tailwind)..."
+cat << 'EOF' > postcss.config.js
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+EOF
+
+echo "4. Re-writing src/index.css with Tailwind directives..."
+cat << 'EOF' > src/index.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: #050505;
+  }
+  body {
+    @apply bg-[#050505] text-[#e5e5e5] antialiased selection:bg-[#d4af37]/30 selection:text-white;
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.text-stroke {
+  -webkit-text-stroke: 1px rgba(255,255,255,0.1);
+  color: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}
+EOF
+
+echo "5. Updating src/main.jsx (Fixing the CSS import)..."
 cat << 'EOF' > src/main.jsx
 import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -71,15 +127,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 EOF
 
-echo "4. Removing GitHub Actions and installing gh-pages..."
+echo "6. Removing GitHub Actions and installing required dependencies..."
 rm -rf .github
-npm install -D gh-pages
+npm install -D tailwindcss postcss autoprefixer gh-pages
 
-echo "5. Ensuring CNAME is set for aanami.in..."
+echo "7. Ensuring CNAME is set for aanami.in..."
 mkdir -p public
 echo "aanami.in" > public/CNAME
 
-echo "6. Restoring deploy scripts to package.json..."
+echo "8. Restoring deploy scripts to package.json..."
 node -e "
 const fs = require('fs');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
@@ -95,21 +151,15 @@ pkg.scripts = {
 fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 "
 
-echo "7. Committing and Pushing to GitHub..."
+echo "9. Committing and Pushing to GitHub..."
 git add .
-git commit -m "Revert: Switched back to manual gh-pages deployment"
+git commit -m "Fix: Added missing PostCSS config and rebuilt CSS"
 git push origin main
 
-echo "8. Deploying directly to gh-pages branch..."
+echo "10. Deploying directly to gh-pages branch..."
 npm run deploy
 
 echo ""
 echo "==========================================================="
 echo "✅ SUCCESS! Your site is built and pushed to GitHub."
 echo "==========================================================="
-echo "CRITICAL FINAL STEP TO FIX THE 404 ERROR:"
-echo "1. Go to your repository on GitHub."
-echo "2. Click 'Settings' -> 'Pages' (on the left)."
-echo "3. Under 'Build and deployment', change the 'Source' dropdown to 'Deploy from a branch'."
-echo "4. Under 'Branch', select 'gh-pages' and click 'Save'."
-echo "Wait 1-2 minutes, refresh aanami.in, and your site will be live!"

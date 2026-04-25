@@ -5,9 +5,10 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    background-color: #050505;
   }
   body {
-    @apply bg-cinemaBlack text-zinc-300 font-body antialiased selection:bg-accent/30 selection:text-white;
+    @apply bg-[#050505] text-[#e5e5e5] antialiased selection:bg-[#d4af37]/30 selection:text-white;
   }
 }
 
@@ -27,7 +28,6 @@
   color: transparent;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -40,4 +40,3 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #d4af37;
 }
-
