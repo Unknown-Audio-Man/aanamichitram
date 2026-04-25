@@ -71,64 +71,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 EOF
 
-echo "4. Setting up GitHub Actions Workflow..."
-mkdir -p .github/workflows
-cat << 'EOF' > .github/workflows/deploy.yml
-name: Deploy Portfolio to GitHub Pages
-
-on:
-  push:
-    branches: ["main"]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Build project
-        run: npm run build
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-EOF
+echo "4. Removing GitHub Actions and installing gh-pages..."
+rm -rf .github
+npm install -D gh-pages
 
 echo "5. Ensuring CNAME is set for aanami.in..."
 mkdir -p public
 echo "aanami.in" > public/CNAME
 
-echo "6. Cleaning up package.json safely..."
+echo "6. Restoring deploy scripts to package.json..."
 node -e "
 const fs = require('fs');
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
@@ -137,22 +88,28 @@ pkg.scripts = {
   'dev': 'vite',
   'build': 'vite build',
   'lint': 'eslint .',
-  'preview': 'vite preview'
+  'preview': 'vite preview',
+  'predeploy': 'npm run build',
+  'deploy': 'gh-pages -d dist'
 };
 fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 "
 
 echo "7. Committing and Pushing to GitHub..."
 git add .
-git commit -m "Fix: Applied Tailwind config, CSS import, and GitHub Actions deployment"
+git commit -m "Revert: Switched back to manual gh-pages deployment"
 git push origin main
+
+echo "8. Deploying directly to gh-pages branch..."
+npm run deploy
 
 echo ""
 echo "==========================================================="
-echo "✅ SUCCESS! All fixes have been pushed to GitHub."
+echo "✅ SUCCESS! Your site is built and pushed to GitHub."
 echo "==========================================================="
-echo "What happens next?"
-echo "1. Go to https://github.com/Unknown-Audio-Man/aanamichitram/actions"
-echo "2. You will see a yellow dot indicating your site is building."
-echo "3. Once it turns green (about 1 minute), refresh https://aanami.in"
-echo "   and your site will have all of its cinematic styling back!"
+echo "CRITICAL FINAL STEP TO FIX THE 404 ERROR:"
+echo "1. Go to your repository on GitHub."
+echo "2. Click 'Settings' -> 'Pages' (on the left)."
+echo "3. Under 'Build and deployment', change the 'Source' dropdown to 'Deploy from a branch'."
+echo "4. Under 'Branch', select 'gh-pages' and click 'Save'."
+echo "Wait 1-2 minutes, refresh aanami.in, and your site will be live!"
