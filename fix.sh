@@ -128,11 +128,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 EOF
 
-# 9. OVERWRITING App.jsx with Full Layout and Instagram Logic
-echo "📺 Implementing full cinematic App.jsx with Instagram feed..."
+# 9. OVERWRITING App.jsx with Robust API Fetching
+echo "📺 Implementing full cinematic App.jsx with robust Instagram feed..."
 cat << 'EOF' > src/App.jsx
 import React, { useState, useEffect } from 'react';
-import { Camera, Film, Instagram, Mail, Play, MoveRight, ExternalLink, Loader2 } from 'lucide-react';
+import { Camera, Film, Play, MoveRight, ExternalLink, Loader2 } from 'lucide-react';
 
 const App = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -154,15 +154,31 @@ const App = () => {
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // Fetch Instagram via Behold
+    // Robust fetch for Behold JSON
     if (BEHOLD_URL) {
       fetch(BEHOLD_URL)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error("Network response not ok");
+          return res.json();
+        })
         .then(data => {
-          setInstaPhotos(data.slice(0, 6)); // Get latest 6 photos
+          // Behold sometimes returns arrays directly, or wraps them
+          let posts = [];
+          if (Array.isArray(data)) {
+            posts = data;
+          } else if (data && Array.isArray(data.posts)) {
+            posts = data.posts;
+          } else if (data && Array.isArray(data.data)) {
+            posts = data.data;
+          }
+          
+          setInstaPhotos(posts.slice(0, 6)); // Get latest 6 photos
           setLoading(false);
         })
-        .catch(() => setLoading(false));
+        .catch(err => {
+          console.error("Instagram Feed Error:", err);
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
@@ -185,7 +201,7 @@ const App = () => {
           <a href="#contact" className="hover:text-accent transition-colors">Contact</a>
         </div>
 
-        <a href="https://www.instagram.com/sushruthjay" target="_blank" className="flex items-center gap-2 text-accent text-[10px] tracking-widest font-bold uppercase border-b border-accent/20 pb-1 hover:border-accent transition-all">
+        <a href="https://www.instagram.com/sushruthjay" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-accent text-[10px] tracking-widest font-bold uppercase border-b border-accent/20 pb-1 hover:border-accent transition-all">
           Instagram <ExternalLink size={12} />
         </a>
       </nav>
@@ -232,7 +248,7 @@ const App = () => {
             </div>
             <div className="md:col-span-5 reveal">
               <div className="aspect-[3/4] overflow-hidden border border-white/5 bg-zinc-900">
-                <img src="https://images.unsplash.com/photo-1542204172-3c1f11c56f7f?q=80&w=1000" className="w-full h-full object-cover opacity-70 grayscale hover:grayscale-0 transition-all duration-1000" />
+                <img src="https://images.unsplash.com/photo-1542204172-3c1f11c56f7f?q=80&w=1000" className="w-full h-full object-cover opacity-70 grayscale hover:grayscale-0 transition-all duration-1000" alt="Philosophy" />
               </div>
             </div>
           </div>
@@ -253,16 +269,24 @@ const App = () => {
             <div className="flex justify-center py-20"><Loader2 className="animate-spin text-accent" /></div>
           ) : instaPhotos.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {instaPhotos.map((photo) => (
-                <a key={photo.id} href={photo.permalink} target="_blank" rel="noreferrer" className="group reveal overflow-hidden block aspect-square bg-zinc-900">
-                  <img src={photo.mediaUrl} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Instagram Post" />
-                </a>
-              ))}
+              {instaPhotos.map((photo, i) => {
+                // Safeguard against missing data structures
+                const link = photo.permalink || photo.link || `https://instagram.com/sushruthjay`;
+                const imgSource = photo.mediaUrl || photo.url || photo.thumbnailUrl || null;
+
+                if (!imgSource) return null;
+
+                return (
+                  <a key={photo.id || i} href={link} target="_blank" rel="noreferrer" className="group reveal overflow-hidden block aspect-square bg-zinc-900">
+                    <img src={imgSource} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" alt="Instagram Post" />
+                  </a>
+                )
+              })}
             </div>
           ) : (
             <div className="text-center py-20 border border-white/5 rounded-lg">
-                <p className="text-zinc-500 italic text-sm mb-4">Instagram API connection pending.</p>
-                <a href="https://instagram.com/sushruthjay" className="text-accent text-[10px] tracking-widest uppercase font-bold">View Profile Manually</a>
+                <p className="text-zinc-500 italic text-sm mb-4">No recent photos found on the feed.</p>
+                <a href="https://instagram.com/sushruthjay" target="_blank" rel="noreferrer" className="text-accent text-[10px] tracking-widest uppercase font-bold">View Profile Manually</a>
             </div>
           )}
         </div>
@@ -323,7 +347,7 @@ fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 # 12. Git Push & Final Deploy
 echo "📤 Pushing clean source to GitHub..."
 git add .
-git commit -m "Deep Clean: Restored full sections and activated Behold URL"
+git commit -m "Fix: Hardened Instagram API fetching logic to handle variable JSON structures"
 git push origin main
 
 echo "🚀 Running Final Deployment..."
@@ -331,7 +355,7 @@ npm run deploy
 
 echo ""
 echo "==========================================================="
-echo "✅ DEEP REBUILD COMPLETE!"
+echo "✅ UPDATE COMPLETE!"
 echo "==========================================================="
-echo "Your Behold.so Instagram feed is now fully integrated, and the Philosophy/Contact sections are restored."
-echo "Wait 60 seconds, refresh aanami.in, and your full cinematic site will be live!"
+echo "The script has automatically committed, built, and deployed the updates."
+echo "Refresh aanami.in in about 60 seconds."
