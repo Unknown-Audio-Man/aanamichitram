@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Film, Instagram, Mail, ChevronRight, Play, Maximize2, MoveRight } from 'lucide-react';
+import { Camera, Film, Instagram, Mail, Play, MoveRight, ExternalLink } from 'lucide-react';
 
 const App = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeTab, setActiveTab] = useState('all');
+  const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -23,122 +23,128 @@ const App = () => {
     };
   }, []);
 
-  const photos = [
-    { id: 1, category: 'monochrome', url: 'https://images.unsplash.com/photo-1502164980785-f8aa41d53611?auto=format&fit=crop&q=80&w=800', title: 'The Silent Street' },
-    { id: 2, category: 'cinematic', url: 'https://images.unsplash.com/photo-1493238792040-e7141f457782?auto=format&fit=crop&q=80&w=800', title: 'Dawn in Deccan' },
-    { id: 3, category: 'monochrome', url: 'https://images.unsplash.com/photo-1514912846102-1779f6667533?auto=format&fit=crop&q=80&w=800', title: 'Unheard Echoes' },
-    { id: 4, category: 'cinematic', url: 'https://images.unsplash.com/photo-1512418490979-92798ccc13b0?auto=format&fit=crop&q=80&w=800', title: 'Shadow Play' },
+  // Replace these with your actual high-res photo URLs later
+  // For now, I've curated cinematic placeholders that match your vibe
+  const curatedWork = [
+    { id: 1, title: 'Visual Poetry', url: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1200' },
+    { id: 2, title: 'Street Echoes', url: 'https://images.unsplash.com/photo-1493238792040-e7141f457782?q=80&w=1200' },
+    { id: 3, title: 'The Silent Frame', url: 'https://images.unsplash.com/photo-1512418490979-92798ccc13b0?q=80&w=1200' },
+    { id: 4, title: 'Hyderabad After Dark', url: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=1200' },
   ];
 
-  const filteredPhotos = activeTab === 'all' ? photos : photos.filter(p => p.category === activeTab);
-
   return (
-    <div className="min-h-screen">
-      {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-500 px-8 py-6 flex justify-between items-center ${isScrolled ? 'bg-black/90 backdrop-blur-md py-4' : 'bg-transparent'}`}>
-        <div className="font-heading text-xl font-bold tracking-tighter text-white">AANAMI</div>
-        <div className="flex gap-8 text-[10px] uppercase tracking-[0.3em] font-medium hidden md:flex">
-          <a href="#work" className="hover:text-accent transition-colors">Work</a>
-          <a href="#vision" className="hover:text-accent transition-colors">Vision</a>
+    <div className="min-h-screen bg-[#050505]">
+      {/* Cinematic Navigation */}
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-700 px-6 md:px-12 py-8 flex justify-between items-center ${isScrolled ? 'bg-black/95 backdrop-blur-xl py-5 border-b border-white/5' : 'bg-transparent'}`}>
+        <div className="font-heading text-xl font-bold tracking-tighter text-white">SUSHRUTH JAY</div>
+        
+        <div className="flex gap-10 text-[10px] uppercase tracking-[0.4em] font-semibold text-zinc-500 hidden md:flex">
+          <a href="#work" className="hover:text-accent transition-colors">Frames</a>
+          <a href="#vision" className="hover:text-accent transition-colors">Philosophy</a>
           <a href="#contact" className="hover:text-accent transition-colors">Contact</a>
         </div>
-        <div className="flex gap-4">
-          <a href="https://instagram.com" className="text-zinc-500 hover:text-white transition-colors"><Instagram size={18} /></a>
-        </div>
+
+        <a 
+          href="https://www.instagram.com/sushruthjay" 
+          target="_blank" 
+          className="flex items-center gap-2 text-accent text-[10px] tracking-widest font-bold uppercase border-b border-accent/20 pb-1 hover:border-accent transition-all"
+        >
+          Instagram <ExternalLink size={12} />
+        </a>
       </nav>
 
       {/* Hero Section */}
       <section className="relative h-screen flex flex-col justify-center items-center text-center px-4 overflow-hidden">
-        {/* Subtle Background Video/Gif Placeholder */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <div className="absolute inset-0 bg-black/60 z-10"></div>
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/80 to-[#050505] z-10"></div>
           <img 
-            src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=2000" 
-            className="w-full h-full object-cover scale-110 blur-sm"
+            src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=2000" 
+            className="w-full h-full object-cover scale-105"
             alt="Hero Background"
           />
         </div>
 
-        <div className="relative z-20 max-w-4xl">
-          <span className="block font-heading text-accent text-[10px] tracking-[0.8em] mb-6 reveal">TELUGU INDIE FILMMAKER</span>
-          <h1 className="font-heading text-5xl md:text-9xl font-bold text-white mb-8 tracking-tighter reveal">
-            AANAMI<span className="text-accent italic">.</span>
+        <div className="relative z-20">
+          <span className="block font-heading text-accent text-[10px] tracking-[1em] mb-8 reveal">AANAMI CHITRAM PRESENTS</span>
+          <h1 className="font-heading text-6xl md:text-[10rem] font-bold text-white mb-6 tracking-tighter reveal leading-none">
+            SUSHRUTH<br/><span className="text-stroke">JAY.</span>
           </h1>
-          <p className="text-zinc-400 max-w-xl mx-auto text-sm md:text-base leading-loose font-light reveal mb-10">
-            "Aanami" — The Nameless. Exploring the beauty in the ordinary through independent cinema and photography. Based in Hyderabad.
-          </p>
-          <div className="flex gap-6 justify-center reveal">
-            <a href="#work" className="px-8 py-3 border border-white/20 text-[10px] tracking-[0.3em] uppercase hover:bg-white hover:text-black transition-all">View Frames</a>
-            <a href="#vision" className="px-8 py-3 bg-accent text-black text-[10px] tracking-[0.3em] uppercase font-bold hover:bg-white transition-all">The Vision</a>
+          <div className="flex flex-col md:flex-row gap-4 md:gap-12 items-center justify-center mt-12 reveal">
+            <div className="flex items-center gap-3 text-zinc-500 text-[10px] tracking-widest uppercase">
+              <Film size={14} className="text-accent" /> Independent Filmmaker
+            </div>
+            <div className="w-1 h-1 bg-zinc-800 rounded-full hidden md:block"></div>
+            <div className="flex items-center gap-3 text-zinc-500 text-[10px] tracking-widest uppercase">
+              <Camera size={14} className="text-accent" /> Storyteller & Photographer
+            </div>
           </div>
         </div>
 
-        <div className="absolute bottom-10 left-10 hidden md:block vertical-text text-[10px] tracking-[0.5em] text-zinc-600 uppercase">
-            Est. 2024 / Hyderabad
-        </div>
-      </section>
-
-      {/* Vision Section */}
-      <section id="vision" className="py-32 px-8 bg-[#080808]">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-20 items-center">
-          <div className="reveal">
-            <div className="inline-flex items-center gap-3 text-accent mb-6">
-              <Film size={20} />
-              <span className="text-[10px] tracking-[0.4em] uppercase font-bold">Philosophy</span>
-            </div>
-            <h2 className="font-heading text-3xl md:text-4xl text-white mb-8 leading-tight">CHITRAM IS <br/>A CONVERSATION.</h2>
-            <p className="text-zinc-400 text-lg leading-relaxed mb-8 font-light italic">
-              "My lens doesn't look for beauty; it looks for truth. In Telugu cinema, we often chase the grand. I chase the quiet."
-            </p>
-            <div className="space-y-4 text-zinc-500 text-sm leading-relaxed mb-12">
-                <p>Independent filmmaking is about constraints breeding creativity. I focus on atmospheric storytelling where the environment is as much a character as the actors.</p>
-                <p>From the bustling lanes of Charminar to the silence of the Godavari banks, I seek out textures that tell a story.</p>
-            </div>
-            <button className="group flex items-center gap-4 text-white text-[10px] tracking-[0.4em] uppercase font-bold">
-              My Process <MoveRight className="group-hover:translate-x-2 transition-transform text-accent" />
-            </button>
-          </div>
-          <div className="relative reveal">
-            <div className="aspect-[4/5] overflow-hidden grayscale hover:grayscale-0 transition-all duration-1000">
-                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&q=80&w=1000" className="w-full h-full object-cover" alt="Cinema Still" />
-            </div>
-            <div className="absolute top-10 -right-10 w-full h-full border border-accent/20 -z-10"></div>
-          </div>
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-30">
+            <div className="w-[1px] h-12 bg-gradient-to-b from-transparent to-white"></div>
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section id="work" className="py-32 px-8">
+      {/* Philosophy Section */}
+      <section id="vision" className="py-40 px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-12 gap-12 items-start">
+            <div className="md:col-span-7 reveal">
+              <h2 className="font-heading text-zinc-800 text-8xl absolute -top-10 -left-10 select-none pointer-events-none opacity-20 uppercase">Aanami</h2>
+              <h3 className="font-heading text-3xl text-white mb-10 leading-tight">CHASING THE <span className="text-accent italic">NAMELESS</span> EMOTIONS.</h3>
+              <p className="text-zinc-400 text-lg leading-relaxed mb-8 font-light italic">
+                "In a industry that celebrates the loud, I find my stories in the whispers of the Telugu streets."
+              </p>
+              <p className="text-zinc-500 text-sm leading-loose max-w-lg mb-12">
+                My work as a filmmaker is an extension of my photography. I believe every story already exists in the environment; as a director, my job is simply to find the right frame to let it speak. I focus on atmosphere, texture, and the raw human condition.
+              </p>
+              <button className="group flex items-center gap-6 text-white text-[10px] tracking-[0.5em] uppercase font-bold">
+                The Filmmaker's Eye <MoveRight className="group-hover:translate-x-3 transition-transform text-accent" />
+              </button>
+            </div>
+            <div className="md:col-span-5 reveal">
+              <div className="aspect-[3/4] overflow-hidden border border-white/5 bg-zinc-900">
+                <img src="https://images.unsplash.com/photo-1542204172-3c1f11c56f7f?q=80&w=1000" className="w-full h-full object-cover opacity-70 grayscale hover:grayscale-0 transition-all duration-1000" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Curated Work Gallery */}
+      <section id="work" className="py-40 px-6 md:px-12 bg-[#030303]">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 reveal">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-6 reveal">
             <div>
-                <h2 className="font-heading text-3xl text-white mb-2 uppercase">Recent Frames</h2>
-                <p className="text-zinc-500 text-xs tracking-widest uppercase">Photography & Still Studies</p>
+              <h2 className="font-heading text-4xl text-white mb-4 uppercase">Selected Frames</h2>
+              <p className="text-zinc-500 text-[10px] tracking-[0.4em] uppercase">Visual Studies • 2024 Archive</p>
             </div>
-            <div className="flex gap-8 text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-600">
-              {['all', 'cinematic', 'monochrome'].map(tab => (
-                <button 
-                  key={tab} 
-                  onClick={() => setActiveTab(tab)}
-                  className={`${activeTab === tab ? 'text-accent' : 'hover:text-white'} transition-colors`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+            <a 
+              href="https://www.instagram.com/sushruthjay" 
+              target="_blank"
+              className="px-8 py-3 border border-white/10 hover:border-accent/50 text-white text-[10px] tracking-widest uppercase transition-all"
+            >
+              See Latest on Instagram
+            </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {filteredPhotos.map((photo) => (
-              <div key={photo.id} className="group relative aspect-video overflow-hidden bg-zinc-900 reveal">
-                <img 
-                  src={photo.url} 
-                  className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                  alt={photo.title}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-8">
-                    <span className="text-accent text-[10px] tracking-widest uppercase mb-2">{photo.category}</span>
-                    <h3 className="font-heading text-lg text-white">{photo.title}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {curatedWork.map((item) => (
+              <div key={item.id} className="group reveal overflow-hidden">
+                <div className="aspect-[16/9] bg-zinc-900 overflow-hidden relative">
+                  <img 
+                    src={item.url} 
+                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="w-12 h-12 border border-white/20 rounded-full flex items-center justify-center">
+                        <Play size={16} fill="white" className="ml-1" />
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-between items-center px-2">
+                  <h4 className="font-heading text-sm text-zinc-300 tracking-wider">{item.title}</h4>
+                  <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Case Study</span>
                 </div>
               </div>
             ))}
@@ -146,56 +152,26 @@ const App = () => {
         </div>
       </section>
 
-      {/* Project Teaser */}
-      <section className="py-20 px-8">
-        <div className="max-w-4xl mx-auto border border-white/5 bg-[#050505] p-12 md:p-20 text-center reveal">
-            <span className="text-accent text-[10px] tracking-[0.5em] uppercase mb-6 block">Current Project</span>
-            <h2 className="font-heading text-2xl md:text-4xl text-white mb-6">"ANANTAM"</h2>
-            <p className="text-zinc-500 text-sm italic mb-10">An experimental short film on the cyclical nature of memories. Shot entirely on the streets of Hyderabad.</p>
-            <div className="inline-flex items-center gap-2 text-zinc-400 text-[10px] tracking-widest uppercase">
-                <Play size={12} fill="currentColor" /> Teaser Dropping Soon
-            </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer id="contact" className="py-32 px-8 bg-black">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-20 mb-20">
-            <div className="reveal">
-              <h2 className="font-heading text-5xl text-white mb-10 tracking-tighter">LET'S CAPTURE<br/><span className="text-stroke">THE UNSEEN.</span></h2>
-              <p className="text-zinc-500 max-w-sm leading-relaxed mb-10">
-                I'm always looking for collaborative projects in Telugu cinema and conceptual photography. Reach out for vision talks or bookings.
-              </p>
-              <a href="mailto:hello@aanami.in" className="flex items-center gap-4 text-white hover:text-accent transition-colors group">
-                <Mail size={20} className="text-accent" />
-                <span className="text-xl font-light">hello@aanami.in</span>
-              </a>
-            </div>
-            <div className="grid grid-cols-2 gap-8 reveal">
-                <div>
-                    <h4 className="text-[10px] uppercase tracking-widest text-zinc-700 mb-6">Social</h4>
-                    <ul className="space-y-4 text-sm text-zinc-400">
-                        <li><a href="#" className="hover:text-white transition-colors">Instagram</a></li>
-                        <li><a href="#" className="hover:text-white transition-colors">Vimeo</a></li>
-                        <li><a href="#" className="hover:text-white transition-colors">Behance</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 className="text-[10px] uppercase tracking-widest text-zinc-700 mb-6">Focus</h4>
-                    <ul className="space-y-4 text-sm text-zinc-400 font-light">
-                        <li>Indie Feature Films</li>
-                        <li>Conceptual Shorts</li>
-                        <li>Street Photography</li>
-                        <li>Cinematography</li>
-                    </ul>
-                </div>
-            </div>
-          </div>
+      {/* Footer / Connect */}
+      <footer id="contact" className="py-40 px-8 border-t border-white/5 bg-black">
+        <div className="max-w-4xl mx-auto text-center">
+          <span className="text-accent text-[10px] tracking-[0.6em] uppercase mb-12 block reveal">AVAILABLE FOR COLLABORATION</span>
+          <h2 className="font-heading text-4xl md:text-6xl text-white mb-16 reveal tracking-tighter">LET'S BUILD A<br/>NEW PERSPECTIVE.</h2>
           
-          <div className="pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 reveal">
-            <div className="font-heading text-sm font-bold tracking-widest text-zinc-800">AANAMICHITRAM</div>
-            <p className="text-zinc-700 text-[9px] uppercase tracking-[0.5em]">© 2024 Independent Vision. All Rights Reserved.</p>
+          <div className="flex flex-col md:flex-row justify-center gap-12 mb-24 reveal">
+            <a href="mailto:hello@aanami.in" className="group">
+                <p className="text-zinc-500 text-[10px] tracking-widest uppercase mb-2">Email</p>
+                <p className="text-xl text-white group-hover:text-accent transition-colors font-light">hello@aanami.in</p>
+            </a>
+            <a href="https://instagram.com/sushruthjay" target="_blank" className="group">
+                <p className="text-zinc-500 text-[10px] tracking-widest uppercase mb-2">Social</p>
+                <p className="text-xl text-white group-hover:text-accent transition-colors font-light">@sushruthjay</p>
+            </a>
+          </div>
+
+          <div className="pt-20 border-t border-white/5 reveal">
+            <div className="font-heading text-zinc-900 text-[10vw] select-none leading-none opacity-20 mb-8">SUSHRUTH JAY</div>
+            <p className="text-zinc-700 text-[9px] uppercase tracking-[0.5em]">Independent Visuals • Hyderabad, Telangana • © 2024</p>
           </div>
         </div>
       </footer>
